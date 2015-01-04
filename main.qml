@@ -13,7 +13,7 @@ ApplicationWindow
     toolBar:ToolBar
     {
         width:parent.width
-        height:24
+        height:33
         RowLayout {
             anchors.fill: parent
             
@@ -44,6 +44,14 @@ ApplicationWindow
             ToolButton {
                 iconSource: "go-up.svgz"
                 onClicked:fm.search(true)
+            }
+
+			ToolButton {
+                iconSource: "help-about.svgz"
+                onClicked:
+				{
+					String(loader.source).indexOf("help") + 1 ? loader.setSource("body.qml") : loader.setSource("help.qml")
+				}
             }
             
             Item { Layout.fillWidth: true }
