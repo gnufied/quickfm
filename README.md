@@ -7,7 +7,9 @@ a file manager implemented via qtquick
 
 Dependencies: qt >= 5.4
 
-To build just "make".
+To create makefile execute "qmake quickfm.pro".
+
+Then just "make".
 
   	INSTALL
 
