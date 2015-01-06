@@ -281,7 +281,7 @@ file_manager::file_manager()
     {
         if(config_file.open(QIODevice::WriteOnly))
         {
-            config_file.write("quickfm_version=0.1;\n");
+            config_file.write("quickfm_version=0.2;\n");
             config_file.close();
         }
         
