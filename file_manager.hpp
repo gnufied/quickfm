@@ -29,6 +29,7 @@ public:
     
 public slots:
     void search(bool);
+    void search_into();
     void perform_rename(QString,QString);
     bool open_file(QString,QString handler = "");
     void perform_delete(QString);

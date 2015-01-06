@@ -17,13 +17,50 @@ void file_manager::search(bool go_up)
     update();
     
     vlist.clear();
-    QDirIterator it(curDir,QStringList(name_filter),dir_filter,iter_flags);
+
+    QStringList filterr = name_filter.split(' ',QString::SkipEmptyParts);
+
+    QDirIterator it(curDir,filterr,dir_filter,iter_flags);
         
         while (it.hasNext()) 
         {
             vlist << it.next();
             vlist << it.fileName();
             vlist << QVariant(it.fileInfo().isDir()).toString();
+        }
+    
+    emit vlistch(vlist);
+    reset();
+}
+
+void file_manager::search_into()
+{
+    update();
+    
+    vlist.clear();
+
+    QStringList filterr = name_filter.split(' ',QString::SkipEmptyParts);
+
+    QDirIterator it(curDir,filterr,dir_filter,iter_flags);
+        
+        while (it.hasNext()) 
+        {
+    	    it.next();
+   	    it.fileInfo();
+
+	    if(it.fileInfo().isReadable() and mimeDb.mimeTypeForFile(it.fileInfo()).inherits("text/plain"))
+	    {
+		QFile filee(it.filePath());
+		filee.open(QFile::ReadOnly);
+
+		if(filee.readAll().contains(search_pattern.toUtf8()))
+		{
+	    	    vlist << it.filePath();
+            	    vlist << it.fileName();
+            	    vlist << "false";   
+		}
+		filee.close();
+            }	
         }
     
     emit vlistch(vlist);
@@ -206,7 +243,7 @@ void file_manager::update()
  
     recurs ? iter_flags = iter_flags | QDirIterator::Subdirectories : iter_flags;
     nofile ? dir_filter = QDir::NoDotAndDotDot | QDir::Dirs : dir_filter;
-    nofold or search_pattern.size()  ? dir_filter = QDir::NoDotAndDotDot | QDir::Files : dir_filter;
+    nofold ? dir_filter = QDir::NoDotAndDotDot | QDir::Files : dir_filter;
     hidden ? dir_filter = dir_filter | QDir::Hidden : dir_filter;
     casesen ? dir_filter = dir_filter | QDir::CaseSensitive : dir_filter;
 }
@@ -215,7 +252,7 @@ void file_manager::reset()
 {
     name_filter    = QString("*");
     
-    search_pattern = QString("");
+    search_pattern = "";
     
     dir_filter = QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs;
     
