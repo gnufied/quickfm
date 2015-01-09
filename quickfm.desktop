@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=quickfm
+GenericName=File Manager
+X-GNOME-Fullname=QuickFM File Manager
+Comment=Browse the System Directories
+Categories=System
+MimeType=inode/directory
+Exec=quickfm
+Icon=folder
+Terminal=false
+StartupNotify=false
