@@ -19,4 +19,6 @@ To install just "make install".
 
 Dist-files will be install into /usr/share/quickfm
 
+Stable branch should download if wish to try.
+
 NOTICE: Icons by kde-breeze(LGPL). Breeze team holds its rights.
