@@ -13,11 +13,19 @@ Then just "make".
 
   	INSTALL
 
-Dist-files: qml files, icons, readme and license file.
+Dist-files: qml files, icons, readme, license and desktop file.
 
 To install just "make install".
 
-Dist-files will be install into /usr/share/quickfm
+   By Default:
+
+qml files and icons will be install into /usr/share/quickfm.
+
+Desktop file and its icon go to its standart location.
+
+Binary go to /usr/bin.
+
+If you tweak install paths feel free to edit quickfm.pro
 
 Stable branch should download if wish to try.
 
