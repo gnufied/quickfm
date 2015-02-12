@@ -64,7 +64,7 @@ ApplicationWindow
         
         MenuItem {
             text: fm.index + 1 ? fm.vlist[fm.index + 1] : fm.curDir
-            enabled:fm.index + 1
+            enabled:false
             onTriggered: {}
         }
         
@@ -114,19 +114,28 @@ ApplicationWindow
         
         MenuItem {
             text: "Paste"
-            enabled:fm.pendings.length > 0
+            enabled:fm.pendings.length
             onTriggered: {
-                fm.perform_move()
+                fm.paste()
             }
         }
         
         MenuItem {
             text: "Copy"
             enabled:fm.index + 1 || fm.selected.length
-            onTriggered: {
+            onTriggered: 
+            {
+                fm.paste_mode = false;
+                
                 if(fm.selected.length)
                 {
                     fm.pendings = fm.selected
+                }
+                
+                else 
+                {
+                    fm.pendings = [fm.vlist[fm.index]]
+                    fm.index =-1;
                 }
             }
         }
@@ -134,10 +143,19 @@ ApplicationWindow
         MenuItem {
             text: "Cut"
             enabled:fm.index + 1 || fm.selected.length
-            onTriggered: {
+            onTriggered: 
+            {
+                fm.paste_mode = true;
+
                 if(fm.selected.length)
                 {
                     fm.pendings = fm.selected
+                }
+                
+                else 
+                {
+                    fm.pendings = [fm.vlist[fm.index]]
+                    fm.index =-1;
                 }
             }
         }

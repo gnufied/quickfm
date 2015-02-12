@@ -16,6 +16,7 @@ class file_manager : public QObject
     Q_PROPERTY(bool casesen       MEMBER casesen)
     Q_PROPERTY(bool nofile        MEMBER nofile )
     Q_PROPERTY(bool nofold        MEMBER nofold )
+    Q_PROPERTY(bool paste_mode    MEMBER paste_mode )
     
 public:
     file_manager();
@@ -28,6 +29,7 @@ public:
     bool nofile;
     bool nofold;
     short index;
+    bool paste_mode;
     
 public slots:
     void search(bool);
@@ -35,7 +37,7 @@ public slots:
     void perform_rename(QString);
     bool open_file(QString handler = "");
     void perform_delete();
-    void perform_move();
+    void paste();
     QString get_mimetype();
     void make_new(QString,bool);
     

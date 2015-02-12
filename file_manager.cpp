@@ -89,17 +89,18 @@ void file_manager::perform_delete()
     search(false);
 }
 
-void file_manager::perform_move()
+void file_manager::paste()
 {
     QDir::setCurrent(curDir);
 
-    if(pendings[0].isEmpty())
+    if(paste_mode)
     {
         for(short zz=1; zz < pendings.size(); zz++)
         {
             system(QString("mv -f ").append(pendings[zz]).append(" .").toLatin1().constData());
         }
     }
+    
     else
     {
         for(short zz=0; zz < pendings.size(); zz++)
@@ -107,6 +108,7 @@ void file_manager::perform_move()
             system(QString("cp -pPR ").append(pendings[zz]).append(" .").toLatin1().constData());
         }
     }
+    
     pendings.clear();
     emit pendingsch(pendings);
     search(false);

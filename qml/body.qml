@@ -34,21 +34,22 @@ ScrollView
         onDoubleClicked: 
         {
             var obj = flow.childAt(mouseX, mouseY)
-            fm.index = -1;
             
             if(obj)
             {
-                fm.index = obj.index
-                
                 if ( fm.vlist[obj.index+2]=="true" ) 
                 {
                     fm.curDir = fm.vlist[obj.index]
                     fm.search(false)
                 } 
+                
+                else {
+                    fm.index = obj.index
                                 
-                else if(fm.open_file())
-                {
-                    loader.setSource("dialog.qml",{"dialog":1,"txt":"Enter a command to assign this mime or left empty to cancel"})
+                    if(fm.open_file())
+                    {
+                        loader.setSource("dialog.qml",{"dialog":1,"txt":"Enter a command to assign this mime or left empty to cancel"})
+                    }
                 }
             }
         }
