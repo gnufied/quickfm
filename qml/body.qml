@@ -1,5 +1,5 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.3
 
 ScrollView 
 {
@@ -12,6 +12,7 @@ ScrollView
             var obj = flow.childAt(mouseX, mouseY)
             if(obj)
             {
+                
                 if(fm.selected.indexOf(fm.vlist[obj.index]) ==-1)
                 {
                     fm.selected.push(fm.vlist[obj.index])
@@ -33,17 +34,21 @@ ScrollView
         onDoubleClicked: 
         {
             var obj = flow.childAt(mouseX, mouseY)
+            fm.index = -1;
+            
             if(obj)
             {
+                fm.index = obj.index
+                
                 if ( fm.vlist[obj.index+2]=="true" ) 
                 {
                     fm.curDir = fm.vlist[obj.index]
                     fm.search(false)
                 } 
                                 
-                else if(fm.open_file(fm.vlist[obj.index]))
+                else if(fm.open_file())
                 {
-   loader.setSource("dialog.qml",{"dialog":0,"txt":"Handler haven't set.Set a handler via 'Open With' action in right click menu."})
+                    loader.setSource("dialog.qml",{"dialog":1,"txt":"Enter a command to assign this mime or left empty to cancel"})
                 }
             }
         }
@@ -51,20 +56,10 @@ ScrollView
         onPressed:
         {
             var obj = flow.childAt(mouseX, mouseY)
-            if(obj && mouse.button == Qt.RightButton)
+            if(mouse.button == Qt.RightButton)
             {
-                right_click.file = fm.vlist[obj.index]
-                right_click.isDir = fm.vlist[obj.index + 2] == "true"
-                right_click.onItem = true
-                right_click.isSelected = false
-                fm.selected = []
-                right_click.popup()
-            }
-                    
-            else if(mouse.button == Qt.RightButton)
-            {
-                right_click.onItem = false
-                right_click.isSelected = fm.selected.length != 0
+                fm.index = obj ? obj.index : -1
+                obj ? fm.selected = [] : false
                 right_click.popup()
             }
         }

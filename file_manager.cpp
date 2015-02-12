@@ -12,6 +12,7 @@ void file_manager::search(bool go_up)
         directory.setPath(curDir);
         directory.cdUp();
         curDir = directory.absolutePath();
+        emit curDirch(curDir);
     }
     
     update();
@@ -67,16 +68,16 @@ void file_manager::search_into()
     reset();
 }
 
-QString file_manager::get_mimetype(QString path)
+QString file_manager::get_mimetype()
 {
-    return mimeDb.mimeTypeForFile(path).name();
+    return mimeDb.mimeTypeForFile(vlist[index]).name();
 }
 
-void file_manager::perform_delete(QString path)
+void file_manager::perform_delete()
 {
-    if(!path.isEmpty())
+    if(index + 1)
     {
-        system(QString("rm -rf ").append(path).toLatin1().constData());
+        system(QString("rm -rf ").append(vlist[index]).toLatin1().constData());
         search(false);
         return;
     }
@@ -111,9 +112,9 @@ void file_manager::perform_move()
     search(false);
 }
 
-void file_manager::perform_rename(QString path,QString new_name)
+void file_manager::perform_rename(QString new_name)
 {
-    QFileInfo finfo(path);
+    QFileInfo finfo(vlist[index]);
     QDir::setCurrent(curDir);
     QString sttr = QString("rename ").append(finfo.fileName()).append(' ').append(new_name).append(' ').append(finfo.fileName());
     
@@ -153,12 +154,10 @@ void file_manager::make_new(QString name,bool mode)
     emit vlistch(vlist);
 }
 
-bool file_manager::open_file(QString path,QString handler)
+bool file_manager::open_file(QString handler)
 {
-    QMimeType mime_t = mimeDb.mimeTypeForFile(path);
+    QMimeType mime_t = mimeDb.mimeTypeForFile(vlist[index]);
     bool ret = false;
-    
-    if(mime_t.inherits("inode/directory")) return false;
     
     if(!handler.isEmpty())
     {
@@ -190,7 +189,7 @@ bool file_manager::open_file(QString path,QString handler)
 				my_argv[loop] = prog[loop].toLatin1().data();
 			}
 
-			my_argv[prog.size()] = (char*)path.toLatin1().constData();
+			my_argv[prog.size()] = (char*)vlist[index].toLatin1().constData();
 			my_argv[prog.size() + 1] = (char*)0;
 			execv(prog[0].toLatin1().constData(), my_argv);
 			perror("execv");
@@ -218,7 +217,7 @@ bool file_manager::open_file(QString path,QString handler)
 				my_argv[loop] = prog[loop].toLatin1().data();
 			}
 
-			my_argv[prog.size()] = (char*)path.toLatin1().constData();
+			my_argv[prog.size()] = (char*)vlist[index].toLatin1().constData();
 			my_argv[prog.size() + 1] = (char*)0;
 			execv(prog[0].toLatin1().constData(), my_argv);
 			perror("execv");
@@ -274,6 +273,7 @@ file_manager::file_manager()
     :curDir(getenv("HOME"))
 {  
     QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
+    index = -1;
     
     reset();
 
