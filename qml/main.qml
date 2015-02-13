@@ -74,7 +74,7 @@ ApplicationWindow
             text: "Create New Text File"
             onTriggered: 
             {
-                loader.setSource("dialog.qml")
+                loader.setSource("dialog.qml",{"dialog":0,"mode":false})
             }
         }
         
@@ -82,7 +82,7 @@ ApplicationWindow
             text: "Create New Folder"
             onTriggered: 
             {
-                loader.setSource("dialog.qml",{"mode":true})
+                loader.setSource("dialog.qml",{"dialog":0,"mode":true})
             }
         }
             
@@ -108,7 +108,10 @@ ApplicationWindow
             text: "Delete"
             enabled:fm.index + 1 || fm.selected.length
             onTriggered: {
+                fm.selected.length ? fm.pendings = fm.selected : fm.pendings = [fm.vlist[fm.index]]
+                fm.index = -1
                 fm.perform_delete()
+                fm.pendings = []
             }
         }
         
@@ -117,6 +120,7 @@ ApplicationWindow
             enabled:fm.pendings.length
             onTriggered: {
                 fm.paste()
+                fm.pendings = []
             }
         }
         

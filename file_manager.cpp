@@ -9,9 +9,9 @@ void file_manager::search(bool go_up)
 {
     if(go_up)
     {
-        directory.setPath(curDir);
-        directory.cdUp();
-        curDir = directory.absolutePath();
+        dir.setPath(curDir);
+        dir.cdUp();
+        curDir = dir.absolutePath();
         emit curDirch(curDir);
     }
     
@@ -21,7 +21,7 @@ void file_manager::search(bool go_up)
 
     QStringList filterr = name_filter.split(' ',QString::SkipEmptyParts);
 
-    QDirIterator it(curDir,filterr,dir_filter,iter_flags);
+    QDirIterator it(curDir,filterr,filters,flags);
         
         while (it.hasNext()) 
         {
@@ -42,7 +42,7 @@ void file_manager::search_into()
 
     QStringList filterr = name_filter.split(' ',QString::SkipEmptyParts);
 
-    QDirIterator it(curDir,filterr,dir_filter,iter_flags);
+    QDirIterator it(curDir, filterr, filters, flags);
         
         while (it.hasNext()) 
         {
@@ -75,16 +75,16 @@ QString file_manager::get_mimetype()
 
 void file_manager::perform_delete()
 {
-    if(index + 1)
-    {
-        system(QString("rm -rf ").append(vlist[index]).toLatin1().constData());
-        search(false);
-        return;
-    }
-    
-    for(short lenn=0;lenn<selected.size();lenn++)
-    {   
-        system(QString("rm -rf ").append(selected[lenn]).toLatin1().constData());
+    proc.setProgram("rm");
+    QStringList args;
+    args << "-rf";
+    for(short lenn=0;lenn<pendings.size();lenn++)
+    { 
+        args << pendings[lenn];
+        proc.setArguments(args);
+        proc.start();
+        proc.waitForFinished();
+        args.removeLast();
     }
     search(false);
 }
@@ -93,24 +93,13 @@ void file_manager::paste()
 {
     QDir::setCurrent(curDir);
 
-    if(paste_mode)
+    for(short zz=0; zz < pendings.size(); zz++)
     {
-        for(short zz=1; zz < pendings.size(); zz++)
-        {
-            system(QString("mv -f ").append(pendings[zz]).append(" .").toLatin1().constData());
-        }
+        if(paste_mode)system(QString("mv -f ").append(pendings[zz]).append(" .").toLatin1().constData());
+            
+        else system(QString("cp -pPR ").append(pendings[zz]).append(" .").toLatin1().constData());
     }
-    
-    else
-    {
-        for(short zz=0; zz < pendings.size(); zz++)
-        {
-            system(QString("cp -pPR ").append(pendings[zz]).append(" .").toLatin1().constData());
-        }
-    }
-    
-    pendings.clear();
-    emit pendingsch(pendings);
+
     search(false);
 }
 
@@ -133,7 +122,7 @@ void file_manager::make_new(QString name,bool mode)
     
     if(mode)
     {
-        QDir dir(curDir);
+        dir.setPath(curDir);
         if(dir.mkdir(name))
         {
             vlist<< str;
@@ -160,10 +149,12 @@ bool file_manager::open_file(QString handler)
 {
     QMimeType mime_t = mimeDb.mimeTypeForFile(vlist[index]);
     bool ret = false;
+    qDebug()<<vlist[index];
+    qDebug()<<mime_t.name();
     
     if(!handler.isEmpty())
     {
-        configurations[mime_t.name()] = handler;
+        config[mime_t.name()] = handler;
 
 		QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
 
@@ -177,10 +168,11 @@ bool file_manager::open_file(QString handler)
         }
 	}
     
-    if(mime_t.inherits("text/plain") and configurations.contains("text/plain") and !configurations.contains(mime_t.name()))
+    if(mime_t.inherits("text/plain") and config.contains("text/plain") and !config.contains(mime_t.name()))
     {
 		int pid = fork();
-		QStringList prog = configurations["text/plain"].split(' ', QString::SkipEmptyParts);
+		QStringList prog = config["text/plain"].split(' ', QString::SkipEmptyParts);
+        qDebug()<<prog;
 		char* my_argv[prog.size() + 2];
 
 		switch (pid) 
@@ -205,10 +197,13 @@ bool file_manager::open_file(QString handler)
 		}	
     }
     
-    else if(configurations.contains(mime_t.name()))
+    else if(config.contains(mime_t.name()))
     {
 		int pid = fork();
-		QStringList prog = configurations[mime_t.name()].split(' ', QString::SkipEmptyParts);
+		QStringList prog = config[mime_t.name()].split(' ', QString::SkipEmptyParts);
+        qDebug()<<prog;
+        qDebug()<<prog.size();
+        qDebug()<<"zagor";
 		char* my_argv[prog.size() + 2];
 
 		switch (pid) 
@@ -235,6 +230,9 @@ bool file_manager::open_file(QString handler)
     
     else { ret = true;}
     
+    index = -1;
+    emit indexch(-1);
+    
     return ret;
 }
 
@@ -242,11 +240,11 @@ void file_manager::update()
 {  
     if(name_filter.isEmpty()) name_filter = "*";
  
-    recurs ? iter_flags = iter_flags | QDirIterator::Subdirectories : iter_flags;
-    nofile ? dir_filter = QDir::NoDotAndDotDot | QDir::Dirs : dir_filter;
-    nofold ? dir_filter = QDir::NoDotAndDotDot | QDir::Files : dir_filter;
-    hidden ? dir_filter = dir_filter | QDir::Hidden : dir_filter;
-    casesen ? dir_filter = dir_filter | QDir::CaseSensitive : dir_filter;
+    recurs ? flags = flags | QDirIterator::Subdirectories : flags;
+    nofile ? filters = QDir::NoDotAndDotDot | QDir::Dirs : filters;
+    nofold ? filters = QDir::NoDotAndDotDot | QDir::Files : filters;
+    hidden ? filters = filters | QDir::Hidden : filters;
+    casesen ? filters = filters | QDir::CaseSensitive : filters;
 }
 
 void file_manager::reset()
@@ -255,9 +253,9 @@ void file_manager::reset()
     
     search_pattern = "";
     
-    dir_filter = QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs;
+    filters = QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs;
     
-    iter_flags = QDirIterator::NoIteratorFlags;
+    flags = QDirIterator::NoIteratorFlags;
     
     hidden =false;
     recurs =false;
@@ -299,11 +297,11 @@ file_manager::file_manager()
     {
         QStringList line = QString(config_file.readLine()).split(";", QString::SkipEmptyParts)[0].split("=", QString::SkipEmptyParts);
             
-        if ( line.size() == 2 ) configurations[line[0]] = line[1];
+        if ( line.size() == 2 ) config[line[0]] = line[1];
     }
     config_file.close();
     
-    QDirIterator it(curDir,QStringList("*"),dir_filter,iter_flags);
+    QDirIterator it(curDir, QStringList("*"), filters, flags);
     
     while (it.hasNext()) 
     {

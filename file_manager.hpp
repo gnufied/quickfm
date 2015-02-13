@@ -1,5 +1,6 @@
 #include <QMimeDatabase>
 #include <QDirIterator>
+#include <QProcess>
 
 class file_manager : public QObject
 {
@@ -43,18 +44,19 @@ public slots:
     
 signals:
     void vlistch(QStringList);
-    void pendingsch(QStringList);
-    void selectedch(QStringList);  
-    void indexch(short);
+    void selectedch(QStringList);
     void curDirch(QString);
+    void indexch(short);
+    void pendingsch(QStringList);
     
 private:
     void update();
     void reset();
-    QDir directory;
-    QDir::Filters dir_filter;
-    QDirIterator::IteratorFlags iter_flags;
+    QDir dir;
+    QProcess proc;
+    QDir::Filters filters;
+    QDirIterator::IteratorFlags flags;
     
     QMimeDatabase mimeDb;
-    QHash<QString, QString> configurations;
+    QHash<QString, QString> config;
 }; 
