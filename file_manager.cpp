@@ -3,8 +3,6 @@
 #include <QFile>
 #include <QDebug>
 
-#include <unistd.h>
-
 void file_manager::search(bool go_up)
 {
     if(go_up)
@@ -92,12 +90,29 @@ void file_manager::perform_delete()
 void file_manager::paste()
 {
     QDir::setCurrent(curDir);
+    QStringList args;
 
     for(short zz=0; zz < pendings.size(); zz++)
     {
-        if(paste_mode)system(QString("mv -f ").append(pendings[zz]).append(" .").toLatin1().constData());
+        if(paste_mode)
+        {
+            proc.setProgram("mv");
+            args << "-f" << pendings[zz] << ".";
+            proc.setArguments(args);
+            proc.start();
+            proc.waitForFinished();
+            args.clear();
+        }
             
-        else system(QString("cp -pPR ").append(pendings[zz]).append(" .").toLatin1().constData());
+        else
+        {
+            proc.setProgram("cp");
+            args << "-pPR" << pendings[zz] << ".";
+            proc.setArguments(args);
+            proc.start();
+            proc.waitForFinished();
+            args.clear();
+        }
     }
 
     search(false);
@@ -105,11 +120,15 @@ void file_manager::paste()
 
 void file_manager::perform_rename(QString new_name)
 {
-    QFileInfo finfo(vlist[index]);
     QDir::setCurrent(curDir);
-    QString sttr = QString("rename ").append(finfo.fileName()).append(' ').append(new_name).append(' ').append(finfo.fileName());
-    
-    system(sttr.toLatin1().constData());
+    proc.setProgram("rename");
+    QStringList args;
+    args << vlist[index + 1] << new_name << vlist[index + 1];
+    index = -1;
+    emit indexch(-1);
+    proc.setArguments(args);
+    proc.start();
+    proc.waitForFinished();
     search(false);
 }
 
@@ -149,89 +168,44 @@ bool file_manager::open_file(QString handler)
 {
     QMimeType mime_t = mimeDb.mimeTypeForFile(vlist[index]);
     bool ret = false;
-    qDebug()<<vlist[index];
-    qDebug()<<mime_t.name();
     
     if(!handler.isEmpty())
     {
         config[mime_t.name()] = handler;
 
-		QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
+        QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
 
-		QString str = "%1=%2;\n";
+        QString str = "%1=%2;\n";
 
         if(config_file.open(QIODevice::ReadWrite))
         {
-			config_file.readAll();
+            config_file.readAll();
             config_file.write(str.arg(mime_t.name(),handler).toLatin1().constData());
             config_file.close();
         }
-	}
+    }
     
     if(mime_t.inherits("text/plain") and config.contains("text/plain") and !config.contains(mime_t.name()))
     {
-		int pid = fork();
-		QStringList prog = config["text/plain"].split(' ', QString::SkipEmptyParts);
-        qDebug()<<prog;
-		char* my_argv[prog.size() + 2];
-
-		switch (pid) 
-		{
-		case 0:
-			for(char loop=0; loop < prog.size(); loop++)
-			{
-				my_argv[loop] = prog[loop].toLatin1().data();
-			}
-
-			my_argv[prog.size()] = (char*)vlist[index].toLatin1().constData();
-			my_argv[prog.size() + 1] = (char*)0;
-			execv(prog[0].toLatin1().constData(), my_argv);
-			perror("execv");
-			break;
-		
-		case -1:
-			perror("fork");
-			break;
-		default:
-			break;	
-		}	
+        QString prog = config["text/plain"];
+        prog.append(' ');
+        prog.append(vlist[index]);
+        QProcess::startDetached(prog);
+        index = -1;
+        emit indexch(-1);
     }
     
     else if(config.contains(mime_t.name()))
     {
-		int pid = fork();
-		QStringList prog = config[mime_t.name()].split(' ', QString::SkipEmptyParts);
-        qDebug()<<prog;
-        qDebug()<<prog.size();
-        qDebug()<<"zagor";
-		char* my_argv[prog.size() + 2];
-
-		switch (pid) 
-		{
-		case 0:
-			for(char loop=0; loop < prog.size(); loop++)
-			{
-				my_argv[loop] = prog[loop].toLatin1().data();
-			}
-
-			my_argv[prog.size()] = (char*)vlist[index].toLatin1().constData();
-			my_argv[prog.size() + 1] = (char*)0;
-			execv(prog[0].toLatin1().constData(), my_argv);
-			perror("execv");
-			break;
-		
-		case -1:
-			perror("fork");
-			break;
-		default:
-			break;	
-		}	
+		QString prog = config[mime_t.name()];
+        prog.append(' ');
+        prog.append(vlist[index]);
+        QProcess::startDetached(prog);
+        index = -1;
+        emit indexch(-1);
     }
     
     else { ret = true;}
-    
-    index = -1;
-    emit indexch(-1);
     
     return ret;
 }
