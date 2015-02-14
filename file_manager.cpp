@@ -235,9 +235,9 @@ file_manager::~file_manager()
 {}
 
 file_manager::file_manager()
-    :curDir(getenv("HOME"))
 {  
-    QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
+    curDir = QDir::homePath();
+    QFile config_file(QDir::homePath().append("/.config/quickfmrc"));
     index = -1;
     
     reset();
@@ -252,7 +252,7 @@ file_manager::file_manager()
         
         else
         {
-            qDebug()<<"ERROR:Config file couldn't created: "<<QString(getenv("HOME")).append("/.config/efemrc");
+            qDebug()<<"ERROR:Config file couldn't created: "<<QDir::homePath().append("/.config/quickfmrc");
         }
     }
     
