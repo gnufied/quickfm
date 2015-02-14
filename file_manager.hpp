@@ -1,6 +1,5 @@
 #include <QMimeDatabase>
 #include <QDirIterator>
-#include <QProcess>
 
 class file_manager : public QObject
 {
@@ -23,7 +22,7 @@ public:
     file_manager();
     ~file_manager();
     QString curDir,search_pattern,name_filter;
-    QStringList vlist,selected,pendings;
+    QStringList selected,pendings,vlist;
     bool hidden;
     bool recurs;
     bool casesen;
@@ -35,12 +34,12 @@ public:
 public slots:
     void search(bool);
     void search_into();
-    void perform_rename(QString);
-    bool open_file(QString handler = "");
-    void perform_delete();
+    void rename(QString);
+    bool open(QString handler = "");
+    void del();
     void paste();
     QString get_mimetype();
-    void make_new(QString,bool);
+    void nev(QString,bool);
     
 signals:
     void vlistch(QStringList);
@@ -53,7 +52,6 @@ private:
     void update();
     void reset();
     QDir dir;
-    QProcess proc;
     QDir::Filters filters;
     QDirIterator::IteratorFlags flags;
     

@@ -97,7 +97,7 @@ ApplicationWindow
         
         MenuItem {
             text: "Open With"
-            enabled:fm.index + 1 && fm.vlist[fm.index + 2] == "false" 
+            enabled:fm.index + 1 && fm.vlist[fm.index + 2] 
             onTriggered: 
             {
                 loader.setSource("dialog.qml",{"dialog":1,"txt":"Enter a command to assign this mime or left empty to cancel"})
@@ -110,7 +110,7 @@ ApplicationWindow
             onTriggered: {
                 fm.selected.length ? fm.pendings = fm.selected : fm.pendings = [fm.vlist[fm.index]]
                 fm.index = -1
-                fm.perform_delete()
+                fm.del()
                 fm.pendings = []
             }
         }

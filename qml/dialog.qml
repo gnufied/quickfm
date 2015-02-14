@@ -22,15 +22,15 @@ Column
         {
             if(dialog==0)
             {
-                fm.make_new(text,mode)
+                fm.nev(text,mode)
             }
             
             else if(dialog==1 && fld.length)
             {
-                fm.open_file(text)
+                fm.open(text)
             }
             
-            else if(dialog==2) fm.perform_rename(text);
+            else if(dialog==2) fm.rename(text);
  
             loader.setSource("body.qml")
         }

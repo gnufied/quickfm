@@ -1,6 +1,7 @@
 #include "file_manager.hpp"
 
 #include <QFile>
+#include <QProcess>
 #include <QDebug>
 
 void file_manager::search(bool go_up)
@@ -42,21 +43,21 @@ void file_manager::search_into()
 
     QDirIterator it(curDir, filterr, filters, flags);
         
-        while (it.hasNext()) 
-        {
-    	    it.next();
-   	    it.fileInfo();
+    while (it.hasNext()) 
+    {
+        it.next();
+        it.fileInfo();
 
 	    if(it.fileInfo().isReadable() and mimeDb.mimeTypeForFile(it.fileInfo()).inherits("text/plain"))
 	    {
-		QFile filee(it.filePath());
-		filee.open(QFile::ReadOnly);
+            QFile filee(it.filePath());
+            filee.open(QFile::ReadOnly);
 
 		if(filee.readAll().contains(search_pattern.toUtf8()))
 		{
-	    	    vlist << it.filePath();
-            	    vlist << it.fileName();
-            	    vlist << "false";   
+            vlist << it.filePath();
+            vlist << it.fileName();
+            vlist << "false";   
 		}
 		filee.close();
             }	
@@ -71,18 +72,23 @@ QString file_manager::get_mimetype()
     return mimeDb.mimeTypeForFile(vlist[index]).name();
 }
 
-void file_manager::perform_delete()
+void file_manager::del()
 {
-    proc.setProgram("rm");
-    QStringList args;
-    args << "-rf";
     for(short lenn=0;lenn<pendings.size();lenn++)
     { 
-        args << pendings[lenn];
-        proc.setArguments(args);
-        proc.start();
-        proc.waitForFinished();
-        args.removeLast();
+        QFileInfo info(pendings[lenn]);
+        
+        if(info.isDir())
+        {
+            dir.setPath(info.filePath());
+            dir.removeRecursively();
+        }
+            
+        else 
+        {
+            QDir::setCurrent(info.path());
+            QFile::remove(info.fileName());
+        }
     }
     search(false);
 }
@@ -96,43 +102,28 @@ void file_manager::paste()
     {
         if(paste_mode)
         {
-            proc.setProgram("mv");
-            args << "-f" << pendings[zz] << ".";
-            proc.setArguments(args);
-            proc.start();
-            proc.waitForFinished();
-            args.clear();
+            
         }
             
         else
         {
-            proc.setProgram("cp");
-            args << "-pPR" << pendings[zz] << ".";
-            proc.setArguments(args);
-            proc.start();
-            proc.waitForFinished();
-            args.clear();
+            
         }
     }
 
     search(false);
 }
 
-void file_manager::perform_rename(QString new_name)
+void file_manager::rename(QString new_name)
 {
-    QDir::setCurrent(curDir);
-    proc.setProgram("rename");
-    QStringList args;
-    args << vlist[index + 1] << new_name << vlist[index + 1];
-    index = -1;
-    emit indexch(-1);
-    proc.setArguments(args);
-    proc.start();
-    proc.waitForFinished();
-    search(false);
+    QFileInfo info(vlist[index]);
+        
+    dir.setPath(info.path());
+    
+    if(dir.rename(info.fileName(),new_name)) search(false);
 }
 
-void file_manager::make_new(QString name,bool mode)
+void file_manager::nev(QString name,bool mode)
 {
     QString str;
     str.append(curDir);
@@ -164,7 +155,7 @@ void file_manager::make_new(QString name,bool mode)
     emit vlistch(vlist);
 }
 
-bool file_manager::open_file(QString handler)
+bool file_manager::open(QString handler)
 {
     QMimeType mime_t = mimeDb.mimeTypeForFile(vlist[index]);
     bool ret = false;

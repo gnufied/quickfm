@@ -46,7 +46,7 @@ ScrollView
                 else {
                     fm.index = obj.index
                                 
-                    if(fm.open_file())
+                    if(fm.open())
                     {
                         loader.setSource("dialog.qml",{"dialog":1,"txt":"Enter a command to assign this mime or left empty to cancel"})
                     }
