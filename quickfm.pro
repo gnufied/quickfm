@@ -1,6 +1,6 @@
 QT              += quick
-HEADERS          = file_manager.hpp
-SOURCES         += main.cpp file_manager.cpp
+HEADERS          = fm.hpp
+SOURCES         += main.cpp fm.cpp
 distribute.path  = /usr/share/quickfm
 distribute.files = qml/*.qml icons/*.svgz
 desktop.path     = /usr/share/applications
@@ -9,4 +9,4 @@ icon.path        = /usr/share/pixmaps
 icon.files       = icons/folder.svgz
 target.path      = /usr/bin
 INSTALLS        += target distribute icon desktop
-CONFIG          += c++11 debug qml_debug
+CONFIG          += c++11 #debug qml_debug

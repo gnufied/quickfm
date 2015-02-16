@@ -1,7 +1,8 @@
-#include "file_manager.hpp"
+#include "fm.hpp"
 
 #include <QFile>
 #include <QProcess>
+#include <QJsonDocument>
 #include <QDebug>
 
 void file_manager::search(bool go_up)
@@ -53,15 +54,16 @@ void file_manager::search_into()
             QFile filee(it.filePath());
             filee.open(QFile::ReadOnly);
 
-		if(filee.readAll().contains(search_pattern.toUtf8()))
-		{
-            vlist << it.filePath();
-            vlist << it.fileName();
-            vlist << "false";   
-		}
-		filee.close();
-            }	
+            if(filee.readAll().contains(search_pattern.toUtf8()))
+            {
+                vlist << it.filePath();
+                vlist << it.fileName();
+                vlist << "false";   
+            }
+
+            filee.close();
         }
+    }
     
     emit vlistch(vlist);
     reset();
@@ -96,10 +98,11 @@ void file_manager::del()
 void file_manager::paste()
 {
     QDir::setCurrent(curDir);
-    QStringList args;
 
     for(short zz=0; zz < pendings.size(); zz++)
     {
+        QFileInfo info(pendings[zz]);
+        
         if(paste_mode)
         {
             
@@ -107,7 +110,17 @@ void file_manager::paste()
             
         else
         {
+            if(info.isDir())
+            {
+                dir.setPath(info.filePath());
+                dir.removeRecursively();
+            }
             
+            else 
+            {
+                QDir::setCurrent(info.path());
+                QFile::remove(info.fileName());
+            }
         }
     }
 
@@ -162,23 +175,23 @@ bool file_manager::open(QString handler)
     
     if(!handler.isEmpty())
     {
-        config[mime_t.name()] = handler;
+        cfg.insert(mime_t.name(),QJsonValue(handler));
 
-        QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
+        QFile config_file(QDir::homePath().append("/.config/quickfmrc"));
 
-        QString str = "%1=%2;\n";
+        
 
-        if(config_file.open(QIODevice::ReadWrite))
+        if(config_file.open(QIODevice::WriteOnly))
         {
-            config_file.readAll();
-            config_file.write(str.arg(mime_t.name(),handler).toLatin1().constData());
+            QJsonDocument doc(cfg);
+            config_file.write(doc.toJson());
             config_file.close();
         }
     }
     
-    if(mime_t.inherits("text/plain") and config.contains("text/plain") and !config.contains(mime_t.name()))
+    if(mime_t.inherits("text/plain") and cfg.contains("text/plain") and !cfg.contains(mime_t.name()))
     {
-        QString prog = config["text/plain"];
+        QString prog = cfg["text/plain"].toString();
         prog.append(' ');
         prog.append(vlist[index]);
         QProcess::startDetached(prog);
@@ -186,9 +199,9 @@ bool file_manager::open(QString handler)
         emit indexch(-1);
     }
     
-    else if(config.contains(mime_t.name()))
+    else if(cfg.contains(mime_t.name()))
     {
-		QString prog = config[mime_t.name()];
+		QString prog = cfg[mime_t.name()].toString();
         prog.append(' ');
         prog.append(vlist[index]);
         QProcess::startDetached(prog);
@@ -241,30 +254,14 @@ file_manager::file_manager()
     index = -1;
     
     reset();
-
-    if(!config_file.exists())
-    {
-        if(config_file.open(QIODevice::WriteOnly))
-        {
-            config_file.write("quickfm_version=0.2;\n");
-            config_file.close();
-        }
-        
-        else
-        {
-            qDebug()<<"ERROR:Config file couldn't created: "<<QDir::homePath().append("/.config/quickfmrc");
-        }
-    }
     
-    config_file.open(QFile::ReadOnly);
-    
-    while (!config_file.atEnd())
+    if(config_file.exists())
     {
-        QStringList line = QString(config_file.readLine()).split(";", QString::SkipEmptyParts)[0].split("=", QString::SkipEmptyParts);
-            
-        if ( line.size() == 2 ) config[line[0]] = line[1];
+        config_file.open(QFile::ReadOnly);
+        QJsonDocument doc = QJsonDocument::fromJson(config_file.readAll());
+        cfg = doc.object();
+        config_file.close();
     }
-    config_file.close();
     
     QDirIterator it(curDir, QStringList("*"), filters, flags);
     

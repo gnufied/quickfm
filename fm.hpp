@@ -1,5 +1,6 @@
 #include <QMimeDatabase>
 #include <QDirIterator>
+#include <QJsonObject>
 
 class file_manager : public QObject
 {
@@ -56,5 +57,5 @@ private:
     QDirIterator::IteratorFlags flags;
     
     QMimeDatabase mimeDb;
-    QHash<QString, QString> config;
+    QJsonObject cfg;
 }; 
