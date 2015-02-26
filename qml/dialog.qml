@@ -22,7 +22,7 @@ Column
         {
             if(dialog==0)
             {
-                fm.nev(text,mode)
+                fm.create(text,mode)
             }
             
             else if(dialog==1 && fld.length)

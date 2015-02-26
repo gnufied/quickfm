@@ -34,7 +34,7 @@ void file_manager::search(bool go_up)
     reset();
 }
 
-void file_manager::search_into()
+void file_manager::find()
 {
     update();
     
@@ -69,11 +69,6 @@ void file_manager::search_into()
     reset();
 }
 
-QString file_manager::get_mimetype()
-{
-    return mimeDb.mimeTypeForFile(vlist[index]).name();
-}
-
 void file_manager::del()
 {
     for(short lenn=0;lenn<pendings.size();lenn++)
@@ -98,29 +93,19 @@ void file_manager::del()
 void file_manager::paste()
 {
     QDir::setCurrent(curDir);
-
+    
     for(short zz=0; zz < pendings.size(); zz++)
     {
-        QFileInfo info(pendings[zz]);
+        QString prog = "cp -a ";
+        prog.append(pendings[zz]);
+        prog.append(" .");
+        QProcess::startDetached(prog);
         
-        if(paste_mode)
+        if (paste_mode)
         {
-            
-        }
-            
-        else
-        {
-            if(info.isDir())
-            {
-                dir.setPath(info.filePath());
-                dir.removeRecursively();
-            }
-            
-            else 
-            {
-                QDir::setCurrent(info.path());
-                QFile::remove(info.fileName());
-            }
+            prog = "rm -r ";
+            prog.append(pendings[zz]);
+            QProcess::startDetached(prog);
         }
     }
 
@@ -136,7 +121,7 @@ void file_manager::rename(QString new_name)
     if(dir.rename(info.fileName(),new_name)) search(false);
 }
 
-void file_manager::nev(QString name,bool mode)
+void file_manager::create(QString name,bool mode)
 {
     QString str;
     str.append(curDir);
@@ -177,9 +162,7 @@ bool file_manager::open(QString handler)
     {
         cfg.insert(mime_t.name(),QJsonValue(handler));
 
-        QFile config_file(QDir::homePath().append("/.config/quickfmrc"));
-
-        
+        QFile config_file(QDir::homePath().append("/.config/quickfm"));
 
         if(config_file.open(QIODevice::WriteOnly))
         {
@@ -250,7 +233,7 @@ file_manager::~file_manager()
 file_manager::file_manager()
 {  
     curDir = QDir::homePath();
-    QFile config_file(QDir::homePath().append("/.config/quickfmrc"));
+    QFile config_file(QDir::homePath().append("/.config/quickfm"));
     index = -1;
     
     reset();

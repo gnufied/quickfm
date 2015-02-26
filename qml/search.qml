@@ -66,13 +66,15 @@ Column
             {
                 directory.text.length ? fm.curDir = directory.text : false
                 fm.name_filter = nameFilters.text
-		if(pattern.text)
-		{ 
-		    fm.nofold = true
-		    fm.search_pattern = pattern.text
-		    fm.search_into()
-		}
-                else {fm.search(false);}
+                
+                if(pattern.text)
+                { 
+                    fm.nofold = true
+                    fm.search_pattern = pattern.text
+                    fm.find()
+                }
+            
+                else {fm.search(false)}
                 loader.source = "body.qml"
             }
         }

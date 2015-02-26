@@ -1,12 +1,12 @@
 QT              += quick
 HEADERS          = fm.hpp
-SOURCES         += main.cpp fm.cpp
-distribute.path  = /usr/share/quickfm
-distribute.files = qml/*.qml icons/*.svgz
+SOURCES          = main.cpp fm.cpp
+data.path        = /usr/share/quickfm
+data.files       = qml/*.qml icons/*.svgz
 desktop.path     = /usr/share/applications
 desktop.files    = quickfm.desktop
 icon.path        = /usr/share/pixmaps
 icon.files       = icons/folder.svgz
 target.path      = /usr/bin
-INSTALLS        += target distribute icon desktop
-CONFIG          += c++11 #debug qml_debug
+INSTALLS         = target data icon desktop
+CONFIG          += c++14 release #debug qml_debug

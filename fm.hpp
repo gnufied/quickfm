@@ -34,13 +34,12 @@ public:
     
 public slots:
     void search(bool);
-    void search_into();
+    void find();
     void rename(QString);
     bool open(QString handler = "");
     void del();
     void paste();
-    QString get_mimetype();
-    void nev(QString,bool);
+    void create(QString,bool);
     
 signals:
     void vlistch(QStringList);

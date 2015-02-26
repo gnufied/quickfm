@@ -9,9 +9,12 @@ ScrollView
         acceptedButtons: Qt.LeftButton | Qt.RightButton       
         onClicked:
         {
+            console.log(mouseX)
+            console.log(mouseY)
             var obj = flow.childAt(mouseX, mouseY)
             if(obj)
             {
+                console.log(fm.vlist[obj.index])
                 
                 if(fm.selected.indexOf(fm.vlist[obj.index]) ==-1)
                 {
