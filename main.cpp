@@ -4,7 +4,7 @@
 #include <QIcon>
 //#include <QDebug>
 
-#include "file_manager.hpp"
+#include "fm.hpp"
 
 int main( int argc, char ** argv )
 {

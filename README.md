@@ -3,21 +3,21 @@ quickfm
 
 a file manager implemented via qtquick
 
-	BUILD INSTRUCTSIONS
+    BUILD INSTRUCTSIONS
 
 Dependencies: qt >= 5.4
 
-To create makefile execute "qmake quickfm.pro".
+To create makefile execute "qmake".
 
-Then just "make".
+Then run "make".
 
-  	INSTALL
+    INSTALL
 
 Dist-files: qml files, icons, readme, license and desktop file.
 
-To install just "make install".
+To install run "sudo make install".
 
-   By Default:
+    By Default:
 
 qml files and icons will be install into /usr/share/quickfm.
 
@@ -25,6 +25,16 @@ Desktop file and its icon go to its standart location.
 
 Binary go to /usr/bin.
 
-If you tweak install paths feel free to edit quickfm.pro
+If you want to tweak paths feel free to edit quickfm.pro
+
+Please select stable branch not master.Code is public domain. 
 
 NOTICE: Icons by kde-breeze(LGPL). Breeze team holds its rights.
+
+    Known Issues:
+    
+-MouseArea into ScrollView  return wrong  mouseX and mouseY (when scrolled)
+
+    TODO:
+
+-Consider using File picker (FileDialog qml type)

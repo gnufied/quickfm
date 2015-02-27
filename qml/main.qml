@@ -61,16 +61,20 @@ ApplicationWindow
     Menu
     {
         id:right_click
-        property string file:""
-        property bool onItem:false
-        property bool isSelected:false
-        property bool isDir:false
+        
+        MenuItem {
+            text: fm.index + 1 ? fm.vlist[fm.index + 1] : fm.curDir
+            enabled:false
+            onTriggered: {}
+        }
+        
+        MenuSeparator { }
         
         MenuItem {
             text: "Create New Text File"
             onTriggered: 
             {
-                loader.setSource("dialog.qml",{"mode":false,"dialog":1,"txt":"Please enter a name for file."})
+                loader.setSource("dialog.qml",{"dialog":0,"mode":false})
             }
         }
         
@@ -78,71 +82,84 @@ ApplicationWindow
             text: "Create New Folder"
             onTriggered: 
             {
-                loader.setSource("dialog.qml",{"mode":true,"dialog":1,"txt":"Please enter a name for folder."})
+                loader.setSource("dialog.qml",{"dialog":0,"mode":true})
             }
         }
             
         MenuItem {
             text: "Rename"
-            enabled:right_click.onItem
+            enabled:fm.index + 1
             onTriggered:
             {
-                loader.setSource("dialog.qml",{"dialog":3,"txt":right_click.file})
+                loader.setSource("dialog.qml",{"dialog":2})
             }
         }
         
         MenuItem {
             text: "Open With"
-            enabled:!right_click.isDir && right_click.onItem
+            enabled:fm.index + 1 && fm.vlist[fm.index + 2] 
             onTriggered: 
             {
-                loader.setSource("dialog.qml",{"dialog":2,"txt":right_click.file})
+                loader.setSource("dialog.qml",{"dialog":1,"txt":"Enter a command to assign this mime or left empty to cancel"})
             }
         }
         
         MenuItem {
             text: "Delete"
-            enabled:right_click.onItem || right_click.isSelected
+            enabled:fm.index + 1 || fm.selected.length
             onTriggered: {
-                right_click.onItem ? fm.perform_delete(right_click.file) : fm.perform_delete("")
+                fm.selected.length ? fm.pendings = fm.selected : fm.pendings = [fm.vlist[fm.index]]
+                fm.index = -1
+                fm.del()
+                fm.pendings = []
             }
         }
         
         MenuItem {
             text: "Paste"
-            enabled:fm.pendings.length > 0
+            enabled:fm.pendings.length
             onTriggered: {
-                fm.perform_move()
+                fm.paste()
+                fm.pendings = []
             }
         }
         
         MenuItem {
             text: "Copy"
-            enabled:right_click.onItem || right_click.isSelected
-            onTriggered: {
-                if(right_click.onItem)
-                {
-                    fm.pendings = [right_click.file]
-                }
-                else
+            enabled:fm.index + 1 || fm.selected.length
+            onTriggered: 
+            {
+                fm.paste_mode = false;
+                
+                if(fm.selected.length)
                 {
                     fm.pendings = fm.selected
+                }
+                
+                else 
+                {
+                    fm.pendings = [fm.vlist[fm.index]]
+                    fm.index =-1;
                 }
             }
         }
         
         MenuItem {
             text: "Cut"
-            enabled:right_click.onItem || right_click.isSelected
-            onTriggered: {
-                if(right_click.onItem)
-                {
-                    fm.pendings = ["",right_click.file]
-                }
-                else
+            enabled:fm.index + 1 || fm.selected.length
+            onTriggered: 
+            {
+                fm.paste_mode = true;
+
+                if(fm.selected.length)
                 {
                     fm.pendings = fm.selected
-                    fm.pendings.unshift("")
+                }
+                
+                else 
+                {
+                    fm.pendings = [fm.vlist[fm.index]]
+                    fm.index =-1;
                 }
             }
         }

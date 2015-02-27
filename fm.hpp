@@ -1,10 +1,12 @@
 #include <QMimeDatabase>
 #include <QDirIterator>
+#include <QJsonObject>
 
 class file_manager : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString     curDir MEMBER curDir)
+    Q_PROPERTY(QString     curDir MEMBER curDir NOTIFY curDirch)
+    Q_PROPERTY(short  index MEMBER index NOTIFY indexch)
     Q_PROPERTY(QStringList vlist  MEMBER vlist   NOTIFY vlistch)
     Q_PROPERTY(QStringList selected  MEMBER selected NOTIFY selectedch)
     Q_PROPERTY(QStringList pendings  MEMBER pendings NOTIFY pendingsch)
@@ -15,40 +17,44 @@ class file_manager : public QObject
     Q_PROPERTY(bool casesen       MEMBER casesen)
     Q_PROPERTY(bool nofile        MEMBER nofile )
     Q_PROPERTY(bool nofold        MEMBER nofold )
+    Q_PROPERTY(bool paste_mode    MEMBER paste_mode )
     
 public:
     file_manager();
     ~file_manager();
     QString curDir,search_pattern,name_filter;
-    QStringList vlist,selected,pendings;
+    QStringList selected,pendings,vlist;
     bool hidden;
     bool recurs;
     bool casesen;
     bool nofile;
     bool nofold;
+    short index;
+    bool paste_mode;
     
 public slots:
     void search(bool);
-    void search_into();
-    void perform_rename(QString,QString);
-    bool open_file(QString,QString handler = "");
-    void perform_delete(QString);
-    void perform_move();
-    QString get_mimetype(QString);
-    void make_new(QString,bool);
+    void find();
+    void rename(QString);
+    bool open(QString handler = "");
+    void del();
+    void paste();
+    void create(QString,bool);
     
 signals:
     void vlistch(QStringList);
+    void selectedch(QStringList);
+    void curDirch(QString);
+    void indexch(short);
     void pendingsch(QStringList);
-    void selectedch(QStringList);  
     
 private:
     void update();
     void reset();
-    QDir directory;
-    QDir::Filters dir_filter;
-    QDirIterator::IteratorFlags iter_flags;
+    QDir dir;
+    QDir::Filters filters;
+    QDirIterator::IteratorFlags flags;
     
     QMimeDatabase mimeDb;
-    QHash<QString, QString> configurations;
+    QJsonObject cfg;
 }; 
