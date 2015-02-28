@@ -4,7 +4,9 @@ v0.3 released   Feb 28,2015
     
     *Bug fixed that when scrollbar was scrolled user can not able to select a file or folder.
     
-    *System header inclusion nuked.Moved from system() to QProcess::startDetached().So platform portability improved.
+    *System header inclusion removed.Moved from system() to QProcess::startDetached().So platform portability improved.
+    
+    *Code is public domain from now on. 
 
 v0.2 released   Jan 6,2015
 
