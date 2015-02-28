@@ -1,0 +1,15 @@
+v0.3 released   Feb 28,2015
+
+    *Config stuff moved to QJsonDocument,so code was cleared and improved
+    
+    *Bug fixed that when scrollbar was scrolled user can not able to select a file or folder.
+    
+    *System header inclusion nuked.Moved from system() to QProcess::startDetached().So platform portability improved.
+
+v0.2 released   Jan 6,2015
+
+    *Help menu and doc added
+
+    *New feature: Search for pattern in text file and filter files according to result
+
+v0.1 released (first release)   Jan 3,2015
