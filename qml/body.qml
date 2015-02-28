@@ -5,17 +5,16 @@ ScrollView
 {
     MouseArea 
     {
+        id:msa
         anchors.fill:parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton       
         onClicked:
         {
-            console.log(mouseX)
-            console.log(mouseY)
-            var obj = flow.childAt(mouseX, mouseY)
+            var tt = flow.mapFromItem(msa, mouseX, mouseY)
+            var obj = flow.childAt(tt.x, tt.y)
+            
             if(obj)
             {
-                console.log(fm.vlist[obj.index])
-                
                 if(fm.selected.indexOf(fm.vlist[obj.index]) ==-1)
                 {
                     fm.selected.push(fm.vlist[obj.index])
@@ -68,7 +67,7 @@ ScrollView
             }
         }
     }
-                    
+    
     Flow 
     {
         id:flow
@@ -104,4 +103,4 @@ ScrollView
             }
         }
     }
-}  
+} 

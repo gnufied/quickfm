@@ -17,7 +17,7 @@ Dist-files: qml files, icons, readme, license and desktop file.
 
 To install run "sudo make install".
 
-    By Default:
+    DEFAULTS:
 
 qml files and icons will be install into /usr/share/quickfm.
 
@@ -31,10 +31,10 @@ Please select stable branch not master.Code is public domain.
 
 NOTICE: Icons by kde-breeze(LGPL). Breeze team holds its rights.
 
-    Known Issues:
+    KNOWN ISSUES:
     
--MouseArea into ScrollView  return wrong  mouseX and mouseY (when scrolled)
+-None
 
     TODO:
 
--Consider using File picker (FileDialog qml type)
+-When FileDialog fixed at upstream(KDE side) add it as file picker.
