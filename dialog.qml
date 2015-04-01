@@ -21,7 +21,7 @@ Column
             break
                 
         case 2:
-            rett = fm.get_mimetype(txt)
+            rett = String("Enter full path for program.Arguments are supported.(eg /usr/bin/foo --bar) Mimetype: ").concat(fm.get_mimetype(txt))
             break
                 
         case 3:
@@ -50,6 +50,8 @@ Column
     TextField
     {
         id:fld
+		width:loader.width
+		height:30
         text: ""
         visible:parent.dialog > 0
         onAccepted:
@@ -69,5 +71,5 @@ Column
             loader.setSource("body.qml")
         }
     }
-    spacing:10
+    spacing:20
 } 

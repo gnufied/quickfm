@@ -126,21 +126,41 @@ bool file_manager::open_file(QString path,QString handler)
     if(!handler.isEmpty())
     {
         configurations[mime_t.name()] = handler;
-    }
+
+		QFile config_file(QString(getenv("HOME")).append("/.config/efemrc"));
+
+		QString str = "%1=%2;\n";
+
+        if(config_file.open(QIODevice::ReadWrite))
+        {
+			config_file.readAll();
+            config_file.write(str.arg(mime_t.name(),handler).toLatin1().constData());
+            config_file.close();
+        }
+	}
     
     if(mime_t.inherits("text/plain") and configurations.contains("text/plain") and !configurations.contains(mime_t.name()))
     {
 		int pid = fork();
-		const char* prog = configurations["text/plain"].toLatin1().constData();
+		QStringList prog = configurations["text/plain"].split(' ', QString::SkipEmptyParts);
+		char* my_argv[prog.size() + 2];
+
 		switch (pid) 
 		{
 		case 0:
-			execl(prog, prog, path.toLatin1().constData(),(char*)NULL);
-			perror("execl:");
+			for(char loop=0; loop < prog.size(); loop++)
+			{
+				my_argv[loop] = prog[loop].toLatin1().data();
+			}
+
+			my_argv[prog.size()] = (char*)path.toLatin1().constData();
+			my_argv[prog.size() + 1] = (char*)0;
+			execv(prog[0].toLatin1().constData(), my_argv);
+			perror("execv");
 			break;
 		
 		case -1:
-			perror("fork:");
+			perror("fork");
 			break;
 		default:
 			break;	
@@ -150,16 +170,25 @@ bool file_manager::open_file(QString path,QString handler)
     else if(configurations.contains(mime_t.name()))
     {
 		int pid = fork();
-		const char* prog = configurations[mime_t.name()].toLatin1().constData();
+		QStringList prog = configurations[mime_t.name()].split(' ', QString::SkipEmptyParts);
+		char* my_argv[prog.size() + 2];
+
 		switch (pid) 
 		{
 		case 0:
-			execl(prog, prog, path.toLatin1().constData(),(char*)NULL);
-			perror("execl:");
+			for(char loop=0; loop < prog.size(); loop++)
+			{
+				my_argv[loop] = prog[loop].toLatin1().data();
+			}
+
+			my_argv[prog.size()] = (char*)path.toLatin1().constData();
+			my_argv[prog.size() + 1] = (char*)0;
+			execv(prog[0].toLatin1().constData(), my_argv);
+			perror("execv");
 			break;
 		
 		case -1:
-			perror("fork:");
+			perror("fork");
 			break;
 		default:
 			break;	
